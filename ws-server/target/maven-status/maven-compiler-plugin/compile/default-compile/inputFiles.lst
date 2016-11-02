@@ -1,0 +1,6 @@
+/Users/eladw/git/ws_demo/ws-server/src/main/java/com/liveperson/ws/demo/server/dto/Person.java
+/Users/eladw/git/ws_demo/ws-server/src/main/java/com/liveperson/ws/demo/server/appauth/WsTrackServer.java
+/Users/eladw/git/ws_demo/ws-server/src/main/java/com/liveperson/ws/demo/server/WsTrackConfigurator.java
+/Users/eladw/git/ws_demo/ws-server/src/main/java/com/liveperson/ws/demo/server/auth/AuthData.java
+/Users/eladw/git/ws_demo/ws-server/src/main/java/com/liveperson/ws/demo/server/utils/JacksonUtils.java
+/Users/eladw/git/ws_demo/ws-server/src/main/java/com/liveperson/ws/demo/server/AuthenticationFilter.java
