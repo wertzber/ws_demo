@@ -20,7 +20,7 @@ server.start();
 ```
 
 d. Implement: onOepn(), onClose(), onMessage()
-
+```
 @OnOpen
 public void onOpen(final Session session) throws Exception {
 	// do your thing
@@ -37,6 +37,13 @@ public void onMessage (final Session session, final String incomingMessage) thro
 public void onClose(final Session session) {
     // do your cleanup
 }
+```
+e. - Add ``` static ConcurrentHashSet<Session> sessions = new ConcurrentHashSet<>(); ``` as a class variable, this will let us keep multiple session from various clients
+- Add ``` sessions.add(session); ``` to the onOpen method to save the opening session
+- In the onMessage replace the send message line with: 
+``` sessions.stream().filter(Session::isOpen).forEach(s -> s.getAsyncRemote().sendText("you have a new message: " + incomingMessage)); ```
+- Add some cleanup code ``` sessions.remove(session); ``` to the onClose
+```
 
 2. AuthenticationFilter
 Add filter for request parameter "token" and for uri parameter "username"
@@ -46,7 +53,6 @@ if(token==null){
    ((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN);
 }
 ```
-
 b. Application support subset of token from file input.txt
 use token not authorized from the list
 
@@ -74,81 +80,55 @@ press connect
 
 expected output: disconnect after establish websocket.
 
-
-
-
-
-In order to add websocket support we will make our server class also the endpoint
-- Add 
-``` @ServerEndpoint("/ws-track") ``` 
-to the class signature, this defines the class as a websocket endpoint
-(comment: endpoints can be added as annotations or programmatically)
-You will need the ``` import javax.websocket.server.ServerEndpoint; ``` import
-- Add the endpoint class to the server: 
-Add ``` WebSocketServerContainerInitializer.configureContext(new ServletContextHandler(server, "/")).addEndpoint(WsTrackServer.class); ```
-right before the ``` server.start(); ``` line
-- Adding event handling:
-onOpen in order to deal with connection opening requests
-onMessage to deal with incoming messages
-onClose for cleaning on closing sessions
-```
-@OnOpen
-public void onOpen(final Session session) throws Exception {
-	// do your thing
-	session.getAsyncRemote().sendText("you are connected");
-}
-
-@OnMessage
-public void onMessage (final Session session, final String incomingMessage) throws Exception {
-	// do your thing
-	session.getAsyncRemote().sendText("Your message: " + incomingMessage + " arrived");
-} 
-
-@OnClose
-public void onClose(final Session session) {
-    // do your cleanup
-}
-```    
-
-## See it in live
-1. Open your preferred browser
-2. Go to: http://www.websocket.org/echo.html
-4. Connect to your ```ws://localhost:9090/ws-track```
-5. Send some text
-
-
-## Enhancements
-### Let do some broadcasting
-- Add ``` static ConcurrentHashSet<Session> sessions = new ConcurrentHashSet<>(); ``` as a class variable, this will let us keep multiple session from various clients
-- Add ``` sessions.add(session); ``` to the onOpen method to save the opening session
-- In the onMessage replace the send message line with: 
-``` sessions.stream().filter(Session::isOpen).forEach(s -> s.getAsyncRemote().sendText("you have a new message: " + incomingMessage)); ```
-- Add some cleanup code ``` sessions.remove(session); ``` to the onClose
-- Restart the server
-- Open another tab with http://www.websocket.org/echo.html and connect to your server ```ws://localhost:9090/ws-track```
-- Send a message from one tab, and you can see it in the other
-
-### Lets add some JSON stuff
+### Lets add some JSON stuff (ex2)
 - Add the followed to your pom dependencies
 ```
-<dependency>
-  <groupId>com.google.code.gson</groupId>
-  <artifactId>gson</artifactId>
-  <version>2.4</version>
-</dependency>
+<dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.5.0</version>
+        </dependency>
 ```
+- create class Person with multiple fields with getters and setters
+
 - In your WsTrackServer add the followed right next to the sessions definitions
 ```
-static final Gson gson = new GsonBuilder().create();
+ObjectMapper om = new ObjectMapper();
+
+//can add fields for later versions - it means don't fail on extra fields
+om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); 
+
+//don't send null fields in order to save badwidth
+om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+//in case of wrong enum put null and don't fail req
+om.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL,true); 
 ```
 - Add the followed under the onMessage method
 ```
-  final JsonObject jsonObject = gson.fromJson(incomingMessage, JsonObject.class);
-  final JsonElement message = jsonObject.get("message");
-  final String asString = message.getAsString();
+ final Session s = sessions.get(userName);
+        try{
+            Person person = om.readValue(msg, Person.class);
+            LOGGER.info("msg after jackson serialize {}", person);
+            if (s != null) {
+	    	//send echo
+                s.getAsyncRemote().sendText(om.writeValueAsString(person));
+            } else {
+                LOGGER.warn("Can't echo msg, user {} not connected ", userName);
+            }
+        } catch(Exception e){
+            if(s!=null){
+                s.getAsyncRemote().sendText(userName + "send unsupported message " + msg );
+            }
+        }
 ```
-Replace ``` sessions.stream().filter(Session::isOpen).forEach(s -> s.getAsyncRemote().sendText("you have a new message: " + incomingMessage)); ```
-With ``` sessions.stream().filter(Session::isOpen).forEach(s -> s.getAsyncRemote().sendText("you have a new message: " + asString)); ```
+
 
 Now we are JSON aware and can add logic per the received json object...
 Lets give it a try in the echo test page, send a message like ``` {"message" : "any test you wish"} ``` the server will parse and show on the message value, this message will send to all connected sessions
