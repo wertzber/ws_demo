@@ -79,6 +79,7 @@ public class WsTrackServer {
             }
         }
 
+
         sessions.put(userName, session);
         session.getAsyncRemote().sendText("you are connected");
         printAllSessions();
