@@ -4,10 +4,13 @@ From the host machine clone this project and run mvn package in order to build t
 ## Inside the code...
 1. WsTrackServer.class
 
-a. annotate with 
+a. ### Path Parameters
+We can use path paraneters to so some filtering and more app logic
+- Change your server endpoint annotation to the followed
 ```
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
 ```
+
 b. implement: onOpen(), onClose(),  onMessage()
 
 c. method main
@@ -134,10 +137,7 @@ om.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL,true);
 Now we are JSON aware and can add logic per the received json object...
 Lets give it a try in the echo test page, send a message like ``` {"message" : "any test you wish"} ``` the server will parse and show on the message value, this message will send to all connected sessions
 
-### Path Parameters
-We can use path paraneters to so some filtering and more app logic
-- Change your server endpoint annotation to the followed
-`` @ServerEndpoint("/ws-track/{username}") ``
+
 
 - Change the sessions definition to  be Map
 `` static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>() ``
