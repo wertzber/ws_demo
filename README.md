@@ -38,12 +38,11 @@ public void onClose(final Session session) {
     // do your cleanup
 }
 ```
-e. - Add ``` static ConcurrentHashSet<Session> sessions = new ConcurrentHashSet<>(); ``` as a class variable, this will let us keep multiple session from various clients
-- Add ``` sessions.add(session); ``` to the onOpen method to save the opening session
+e. - Add: `` static ConcurrentHashSet<Session> sessions = new ConcurrentHashSet<>(); `` as a class variable, this will let us keep multiple session from various clients
+- Add `` sessions.add(session); `` to the onOpen method to save the opening session
 - In the onMessage replace the send message line with: 
-``` sessions.stream().filter(Session::isOpen).forEach(s -> s.getAsyncRemote().sendText("you have a new message: " + incomingMessage)); ```
+`` s.getAsyncRemote().sendText(userName + " message " + msg );``
 - Add some cleanup code ``` sessions.remove(session); ``` to the onClose
-```
 
 2. AuthenticationFilter
 Add filter for request parameter "token" and for uri parameter "username"
