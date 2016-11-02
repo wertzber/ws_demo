@@ -144,9 +144,3 @@ Then use the json:
 the echo test page
 
 
-
-* Restart the server
-* Reconnect the echo tabs in your browser
-* Add a user name to each tab connection for example one tab uri will be: ``` ws://localhost:9090/ws-track/oded ``` and the other tab with another user name
-* send a message like ``` {"message":"hi", "to":"oded"} ``` you can see that message appears only on "oded" tab
-* Do the same as above with the user name in the "to" and you can see that message arrived only to the other tab
