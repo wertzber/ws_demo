@@ -135,35 +135,15 @@ om.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL,true);
 
 
 Now we are JSON aware and can add logic per the received json object...
-Lets give it a try in the echo test page, send a message like ``` {"message" : "any test you wish"} ``` the server will parse and show on the message value, this message will send to all connected sessions
-
-
-
-- Change the sessions definition to  be Map
-`` static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>() ``
-
-- Change the onOpen signature to the followed
-`` public void onOpen(final Session session, final @PathParam("username") String userName) throws Exception ``
-
-- Change the sessions.add line to 
-`` sessions.put(userName, session); ``
-- Change the onMessage method to the followed
+Lets give it a try.
+First connect: ws://localhost:9090/ws-track/eladw?token=1234
+Then use the json:
 ```
-    @OnMessage
-    public void onMessage (final Session session, final @PathParam("username") String userName, final String msg) throws Exception {
-        final JsonObject jsonObject = gson.fromJson(incomingMessage, JsonObject.class);
-        final JsonElement message = jsonObject.get("message");
-        final JsonElement to = jsonObject.get("to");
-
-        String sendto = to != null ? to.getAsString() : "";
-        final Session s = sessions.get(sendto);
-        if (s != null) {
-            s.getAsyncRemote().sendText(userName + " says: " + message.getAsString());
-        } else {
-            sessions.values().stream().filter(Session::isOpen).forEach(es -> es.getAsyncRemote().sendText(userName + ": " + message.getAsString()));
-        }
-    }
+{"name":"eladw","age":22,","msgs":["msg1","msg2"]}
 ```
+the echo test page
+
+
 
 * Restart the server
 * Reconnect the echo tabs in your browser
