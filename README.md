@@ -82,6 +82,7 @@ expected output: disconnect after establish websocket.
 
 ### Lets add some JSON stuff (ex2)
 - Add the followed to your pom dependencies
+
 ```
 <dependencies>
         <dependency>
@@ -95,6 +96,7 @@ expected output: disconnect after establish websocket.
             <version>2.5.0</version>
         </dependency>
 ```
+
 - create class Person with multiple fields with getters and setters
 
 - In your WsTrackServer add the followed right next to the sessions definitions
