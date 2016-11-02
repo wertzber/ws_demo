@@ -18,6 +18,26 @@ context.addFilter(AuthenticationFilter.class, "/*", EnumSet.of(DispatcherType.RE
 WebSocketServerContainerInitializer.configureContext(context).addEndpoint(WsTrackServer.class);
 server.start();
 ```
+
+d. Implement: onOepn(), onClose(), onMessage()
+
+@OnOpen
+public void onOpen(final Session session) throws Exception {
+	// do your thing
+	session.getAsyncRemote().sendText("you are connected");
+}
+
+@OnMessage
+public void onMessage (final Session session, final String incomingMessage) throws Exception {
+	// do your thing
+	session.getAsyncRemote().sendText("Your message: " + incomingMessage + " arrived");
+} 
+
+@OnClose
+public void onClose(final Session session) {
+    // do your cleanup
+}
+
 2. AuthenticationFilter
 Add filter for request parameter "token" and for uri parameter "username"
 a. if no token exists: use early failure
