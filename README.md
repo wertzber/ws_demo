@@ -139,12 +139,15 @@ Lets give it a try in the echo test page, send a message like ``` {"message" : "
 We can use path paraneters to so some filtering and more app logic
 - Change your server endpoint annotation to the followed
 `` @ServerEndpoint("/ws-track/{username}") ``
+
 - Change the sessions definition to  be Map
-``` static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>(); ```
+`` static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>() ``
+
 - Change the onOpen signature to the followed
-``` public void onOpen(final Session session, final @PathParam("username") String userName) throws Exception ```
+`` public void onOpen(final Session session, final @PathParam("username") String userName) throws Exception ``
+
 - Change the sessions.add line to 
-``` sessions.put(userName, session); ```
+`` sessions.put(userName, session); ``
 - Change the onMessage method to the followed
 ```
     @OnMessage
