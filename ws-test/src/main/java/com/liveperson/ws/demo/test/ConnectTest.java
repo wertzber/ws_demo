@@ -5,20 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.liveperson.test.common.json.JSON;
 import com.liveperson.test.websocket.impl.JsonWsTester;
 import com.liveperson.test.websocket.impl.WsTester;
-import com.liveperson.ws.demo.server.dto.Person;
+import com.liveperson.ws.demo.server.req.CreatePersonRequest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.websocket.DeploymentException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.liveperson.test.common.json.JSON.Matchers.any;
 import static com.liveperson.test.common.json.JSON.Matchers.withProperty;
-import static com.liveperson.ws.demo.server.utils.JacksonUtils.createPersonJson;
+import static com.liveperson.ws.demo.server.api.utils.JacksonUtils.createObjectMapper;
 
 /**
  * Created by eladw on 10/25/2016.
@@ -82,7 +79,7 @@ public class ConnectTest {
 
     public String createPerson(){
         try {
-            Person p = new Person();
+            CreatePersonRequest p = new CreatePersonRequest();
             p.setAge(22);
             p.setName("eladw");
             List<String> msgs = new ArrayList<>();
@@ -97,5 +94,24 @@ public class ConnectTest {
         }
 
     }
+    public static String createPersonJson(CreatePersonRequest p) throws JsonProcessingException {
+        String json = createObjectMapper().writeValueAsString(p);
+        LOGGER.info(json);
+        return json;
+    }
 
+    public static void main(String[] args) {
+        CreatePersonRequest p = new CreatePersonRequest();
+        p.setAge(22);
+        p.setName("eladw");
+        List<String> msgs = new ArrayList<>();
+        msgs.add("msg1");
+        msgs.add("msg2");
+        p.setMsgs(msgs);
+        try {
+            createPersonJson(p);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
 }
