@@ -1,9 +1,10 @@
-package com.liveperson.ws.demo.server.api.remote;
+package com.liveperson.ws.demo.server.api.endpoint;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liveperson.ws.demo.server.api.AbstractMsg;
 import com.liveperson.ws.demo.server.api.RequestHandler;
+import com.liveperson.ws.demo.server.api.remote.WebSocketRemote;
 import com.liveperson.ws.demo.server.api.req.ReqBody;
 import com.liveperson.ws.demo.server.api.req.RequestMsg;
 import com.liveperson.ws.demo.server.api.req.WsRequestMsg;
