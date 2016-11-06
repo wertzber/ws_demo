@@ -1,15 +1,21 @@
 package com.liveperson.ws.demo.server.req;
 
+import com.liveperson.ws.demo.server.api.req.ReqBody;
+import com.liveperson.ws.demo.server.api.resp.RespBody;
+
 import java.util.List;
 
 /**
  * Created by eladw on 10/30/16.
  */
-public class CreatePersonRequest extends BasicReuqestMessgae {
+public class CreatePerson implements ReqBody {
 
     private String name;
     private int age;
     private List<String> msgs;
+
+    public CreatePerson() {
+    }
 
     public String getName() {
         return name;
@@ -38,10 +44,27 @@ public class CreatePersonRequest extends BasicReuqestMessgae {
 
     @Override
     public String toString() {
-        return "CreatePersonRequest{" +
+        return "CreatePerson{" +
                 "name='" + name + '\'' +
                 ", age=" + age +
                 ", msgs=" + msgs +
                 '}';
     }
+
+    public static class Response implements RespBody<CreatePerson> {
+        /**
+         * Returns currentTime in milliseconds since 1970
+         */
+        public final long currentTime;
+        public final String userId;
+
+        public Response(String userId) {
+            this.currentTime = System.currentTimeMillis();
+            this.userId = userId;
+        }
+        public Response(){this("aaa"); }
+
+    }
+
+
 }

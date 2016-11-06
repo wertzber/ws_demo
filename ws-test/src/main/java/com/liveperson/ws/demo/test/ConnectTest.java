@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.liveperson.test.common.json.JSON;
 import com.liveperson.test.websocket.impl.JsonWsTester;
 import com.liveperson.test.websocket.impl.WsTester;
-import com.liveperson.ws.demo.server.req.CreatePersonRequest;
+import com.liveperson.ws.demo.server.req.CreatePerson;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ public class ConnectTest {
 
     public String createPerson(){
         try {
-            CreatePersonRequest p = new CreatePersonRequest();
+            CreatePerson p = new CreatePerson();
             p.setAge(22);
             p.setName("eladw");
             List<String> msgs = new ArrayList<>();
@@ -94,14 +94,14 @@ public class ConnectTest {
         }
 
     }
-    public static String createPersonJson(CreatePersonRequest p) throws JsonProcessingException {
+    public static String createPersonJson(CreatePerson p) throws JsonProcessingException {
         String json = createObjectMapper().writeValueAsString(p);
         LOGGER.info(json);
         return json;
     }
 
     public static void main(String[] args) {
-        CreatePersonRequest p = new CreatePersonRequest();
+        CreatePerson p = new CreatePerson();
         p.setAge(22);
         p.setName("eladw");
         List<String> msgs = new ArrayList<>();
