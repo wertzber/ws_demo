@@ -1,0 +1,280 @@
+/* base styles */
+
+body {
+    min-width: 1000px;
+    margin: 0;
+    padding: 10px 10px 22px 10px;
+}
+
+hr {
+    padding: 12px 0 0 0;
+    margin: 0 0 12px 0;
+    border: 0 none;
+    border-bottom: 1px solid #eee;
+}
+
+body, input, textarea, select, button {
+    font: 14px trebuchet-ms, sans-serif;
+}
+
+body, input, textarea, select, button, legend {
+    color: #555;
+}
+
+body, legend, fieldset {
+    background-color: #fafafa;
+}
+
+input, textarea, keygen, select, button {
+    margin: 0;
+    padding: 3px 6px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+label, input, button, select {
+    margin-right: 3px;
+}
+
+button, select {
+    background: #e0e0e0 none;
+}
+
+button:hover, select:hover {
+    background-color: #e9e9e9;
+}
+
+button, select, *[class*=button] {
+    cursor: pointer;
+}
+
+button:disabled,
+button:hover:disabled {
+    color: #999;
+    background-color: #e0e0e0; /* hover should have no visible effect */
+    text-shadow: 1px 1px 0 #fff;
+    cursor: default;
+}
+
+/* fix firefox inconsistent button height */
+::-moz-focus-inner {
+    border: 0 none;
+}
+
+select {
+    /* align height with buttons height */
+    padding-top: 2px;
+    padding-bottom: 2px;
+    /* reset user-agent styles */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0;
+    /* push the default select arrow out so we can create our own arrow */
+    text-indent: 0.01px;
+    text-overflow: '';
+    /* make room for our custom arrow */
+    padding-right: 24px;
+    /* create a custom arrow using an SVG background image */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20276.7%20153%22%20enable-background%3D%22new%200%200%20276.7%20153%22%3E%3Cstyle%3E.arrow%7Bfill%3A@{arrow}%3B%7D%3C%2Fstyle%3E%3Cpath%20class%3D%22arrow%22%20d%3D%22M276.7%200H0l138.2%20153z%22%20%2F%3E%3C%2Fsvg%3E");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: auto 20%;
+}
+
+::-ms-expand {
+    display: none;
+}
+
+textarea {
+    box-sizing: border-box;
+    width: 100%;
+    height: 200px;
+    padding: 6px;
+    line-height: 1.7;
+    font-family: consolas, courier-new, monospace;
+    font-size: 90%;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+input[type=checkbox] {
+    margin: 0 2px 2px 10px;
+    vertical-align: text-bottom;
+}
+
+/* fix container height to match containers of other inputs */
+input[type=checkbox] + label {
+    padding: 4px 0;
+    display: inline-block;
+}
+
+input[readonly], textarea[readonly] {
+    border: 1px solid #e6e6e6;
+    background-color: #f0f0f0;
+}
+
+input.x-large {
+    width: 700px;
+}
+
+input.large {
+    width: 500px;
+}
+
+input.medium {
+    width: 300px;
+}
+
+input.small {
+    width: 190px;
+}
+
+input.x-small {
+    width: 80px;
+}
+
+button.stretch {
+    width: 100%;
+    margin: 3px 0;
+    padding: 9px 0;
+}
+
+legend {
+    float: left; /* prevent fieldset top empty space in firefox */
+    margin-top: -20px; /* prevent fieldset top empty space in firefox */
+    margin-left: 50px; /* make room for the collapse toggle button */
+    padding: 0 6px;
+    line-height: 1;
+}
+
+legend + * {
+    clear: both; /* prevent fieldset top empty space in firefox */
+}
+
+fieldset {
+    position: relative;
+    margin: 24px 12px 0 12px;
+    padding: 12px;
+    border: 1px solid #dfdfdf;
+}
+
+fieldset section {
+    margin-bottom: 4px;
+    padding-top: 4px;
+}
+
+fieldset .wrapper {
+    padding-top: 4px;
+}
+
+/* fieldsets are used as layout regions and can be collapsed and expanded */
+
+fieldset.collapsed,
+fieldset.collapsed .wrapper {
+    height: 0;
+}
+
+fieldset.collapsed {
+    padding-bottom: 0;
+    border-bottom-color: transparent;
+    border-right-color: transparent;
+    border-left-color: transparent;
+}
+
+fieldset.collapsed .wrapper {
+    overflow: hidden;
+}
+
+/* popout is used when collapsing a region, to show important controls outside
+so we can use them without expanding the region */
+
+fieldset.collapsed .popout {
+    position: absolute;
+    top: -13px;
+    right: 10px;
+}
+
+fieldset.collapsed section.popout {
+    padding: 0;
+}
+
+fieldset.collapsed .popout,
+fieldset.collapsed .popout * {
+    margin: 0;
+}
+
+fieldset.collapsed .popout {
+    box-shadow: 1px 1px 8px #ccc;
+}
+
+/* clamp all popout elements together with no gaps between them */
+fieldset.collapsed .popout * {
+    float: left;
+}
+
+/* in popouts, only show buttons, inputs and select boxes. and nothing else matters. */
+fieldset.collapsed section.popout *:not(button):not(input):not(select):not(option) {
+    display: none;
+}
+
+/* collapse/expand button for each region - stretch it to the whole region width so we can
+click anywhere in the region top area to toggle collapse/expand */
+
+fieldset .collapse-toggle-button {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: calc(100% - 24px);
+    margin: 0;
+    padding: 0 0 0 24px;
+    background-color: transparent;
+}
+
+fieldset .collapse-toggle-button:before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-top: 5px;
+    border-style: solid;
+
+    border-color: transparent transparent #bbb transparent;
+    border-width: 0 9px 9px 9px;
+}
+
+fieldset.collapsed .collapse-toggle-button:before {
+    border-color: #bbb transparent transparent transparent;
+    border-width: 9px 9px 0 9px;
+}
+
+/* regions can be laid out as tiles */
+
+fieldset.tile {
+    float: left;
+}
+
+fieldset.tile.tile-35 {
+    width: calc(35% - 50px); /* subtract own margins+paddings+borders */
+}
+
+fieldset.tile.tile-65 {
+    width: calc(65% - 50px); /* subtract own margins+paddings+borders */
+}
+
+/* helpers */
+
+.clear-fix {
+    clear: both;
+}
+
+.highlight {
+    font-weight: bold;
+    color: #c32424;
+}
+
+.top-right {
+    position: absolute;
+    top: -7px;
+    right: 8px;
+}

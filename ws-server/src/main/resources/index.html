@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LP Async Messaging Test 28/7/2016</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link href="index.css" rel="stylesheet" media="all"/>
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.2.1.min.js"></script>
+
+    <script type="text/javascript">
+        var websocket;
+        var host = 'localhost:9090';
+        var tokenParam = '1234';
+        var incrementalMessageIndex;
+        var eventId = 0;
+
+        var initialFieldsetCollapsedState = {
+            '#connect-fieldset': false,
+            '#input-fieldset': false,
+            '#output-fieldset': false
+        };
+
+        // the jQuery $(selector) function is used to get an element from the DOM, and act on it, the selector argument
+        // can be any CSS selector, e.g. "#myElementId", ".myElementClassName", or an element reference, e.g. document
+        // $("#wat") is equivalent to document.getElementById("wat")
+
+        $(document).ready(function () {
+
+            buildWebSocketUrl();
+
+            setInitialFieldsetCollapsedState();
+
+            $("#connectBtn").click(function (e) {
+                connect();
+                return false;
+            });
+
+
+            $("#clearLogButton").click(function (e) {
+                clearLog();
+                return false;
+            });
+
+            $("fieldset .collapse-toggle-button").click(function () {
+                var $fieldset = $(this).parent("fieldset");
+                $fieldset.toggleClass("collapsed");
+                return false;
+            });
+
+        });
+
+        function buildWebSocketUrl() {
+            $("#webSocketUrl").val("ws://" + host + "/ws-track/eladw?token=" + tokenParam);
+        }
+
+        function setInitialFieldsetCollapsedState() {
+            for (var selector in initialFieldsetCollapsedState) {
+                $(selector).toggleClass('collapsed', initialFieldsetCollapsedState[selector]);
+            }
+        }
+
+
+
+        function setElementsState() {
+            var isBrandParticipant = $("#participantType").val() === "brand";
+            $("#reqConvBtn").prop("disabled", isBrandParticipant);
+            $("#takeBtn").prop("disabled", !isBrandParticipant);
+            $("#ringId").prop("readonly", !isBrandParticipant);
+            $("#unAssignBtn").prop("disabled", !isBrandParticipant);
+        }
+
+        function connect() {
+
+            if (typeof websocket == 'undefined' || websocket === null) {
+                var webSocketUrl = $("#webSocketUrl").val();
+                console.log(webSocketUrl);
+                if ("WebSocket" in window) {
+                    websocket = new WebSocket(webSocketUrl);
+                    printOutput("Connecting to " + webSocketUrl + "...");
+                    websocket.onopen = onOpen;
+                    websocket.onclose = onClose;
+                    websocket.onmessage = onMessage;
+                    websocket.onerror = onError;
+                    setElementsState();
+                } else {
+                    alert("WebSockets are not supported in your browser.");
+                }
+            } else {
+                websocket.close();
+                websocket = null;
+            }
+        }
+
+        function printOutput(message) {
+            var now;
+            var messageTime;
+            var $outputEl = $("#output");
+            var isScrollLocked = $("#outputScrollLock:checked").length;
+            if ($outputEl && message) {
+                // add a timestamp
+                now = new Date();
+                messageTime = "[" + getDateTimeString(now) + "]\t";
+                // send text to dom element
+                $outputEl.append("\n" + messageTime + message);
+                // scroll to bottom if not already at bottom
+                if (!isScrollLocked) {
+                    $outputEl[0].scrollTop = $outputEl[0].scrollHeight;
+                }
+            }
+        }
+
+        function padNumber(num, desiredDigitsLength) {
+            var magnitude = Math.pow(10, desiredDigitsLength) / 10; // order of magnitude, e.g. 1000, 100
+            var actualDigitsLength = (num + '').length;
+            var zeroPadLeft = num < magnitude ? ('' + magnitude).substring(actualDigitsLength) : '';
+            return zeroPadLeft + num;
+        }
+
+        function getDateTimeString(date) {
+            return padNumber(date.getHours(), 2) + ":" +
+                    padNumber(date.getMinutes(), 2) + ":" +
+                    padNumber(date.getSeconds(), 2) + "," +
+                    padNumber(date.getMilliseconds(), 3);
+        }
+
+        function onOpen(evt) {
+            printOutput("Connected");
+            $("#connectBtn").text("Disconnect");
+        }
+
+        function onClose(evt) {
+            printOutput("Disconnected. reason code: " + evt.code + ", reason text: " + evt.reason);
+            $("#connectBtn").text("Connect");
+            websocket = null;
+        }
+
+        function onMessage(evt) {
+            var responseData = eval("(" + evt.data + ")");
+            console.log("Event: " + evt.data);
+
+            if (responseData.hasOwnProperty("hint")) {
+                printInput(prettifyObject(responseData.hint));
+            }
+
+            printOutput("Response ==> " + prettifyObject(evt.data));
+        }
+
+        function onError(evt) {
+            printOutput("Error: " + evt.data);
+        }
+
+        function sendMessage() {
+            websocket.send($("#input").val());
+            printOutput("Message sent");
+        }
+
+        function sendJson(data) {
+            printInput(prettifyObject(data));
+            sendMessage();
+        }
+
+
+
+        function printInput(message) {
+            var $inputEl = $("#input");
+            if ($inputEl) {
+                $inputEl.val(message);
+            }
+        }
+
+        function clearLog() {
+            $("#output").text("");
+        }
+
+        function prettifyObject(data) {
+            // string could be a serialized object - attempt to make it a real object to prettify it later
+            if (typeof data === 'string') {
+                try {
+                    data = JSON.parse(data);
+                } catch (ex) {
+                    console.error(ex);
+                    // failed in object parsing, just return it as is
+                    return data;
+                }
+            }
+            // grant it with indentation
+            if (typeof data === 'object') {
+                return JSON.stringify(data, null, 2);
+            }
+            return data;
+        }
+
+        function setTakeButtonHighlight(state) {
+            $('#takeBtn').toggleClass('highlight', state);
+        }
+
+        function setUserNameEnabled(enabled) {
+            $("#userNameFirst, #userNameLast").prop("readonly", !enabled);
+            $("#setUserNameBtn").prop("disabled", !enabled);
+        }
+
+
+           </script>
+
+</head>
+
+<body>
+
+<fieldset id="connect-fieldset">
+    <legend>Connect</legend>
+
+    <span class="collapse-toggle-button"></span>
+
+    <div class="wrapper">
+
+        <section>
+            <input id="webSocketUrl" class="x-large" placeholder="Web Socket URL"/>
+            <button id="connectBtn" class="popout">Connect</button>
+        </section>
+    </div>
+</fieldset>
+
+
+
+<fieldset id="input-fieldset" class="tile tile-35">
+    <legend>Input</legend>
+
+    <span class="collapse-toggle-button"></span>
+
+    <div class="wrapper">
+        <section>
+            <textarea id="input"></textarea>
+            <button class="stretch" id="sendMessageButton">Send Message</button>
+        </section>
+    </div>
+</fieldset>
+
+<fieldset id="output-fieldset" class="tile tile-65">
+    <legend>Output</legend>
+
+    <span class="collapse-toggle-button"></span>
+
+    <div class="wrapper">
+        <input id="outputScrollLock" type="checkbox" class="top-right" title="Scroll Lock"/>
+        <section>
+            <textarea id="output" readonly="readonly"></textarea>
+            <button class="stretch" id="clearLogButton">Clear Log</button>
+        </section>
+    </div>
+</fieldset>
+
+
+<div class="clear-fix"></div>
+
+</body>
+</html>
+            

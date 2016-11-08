@@ -6,5 +6,5 @@ release.properties
 
 .idea/
 *.iml
-
+*.class
 dependency-reduced-pom.xml

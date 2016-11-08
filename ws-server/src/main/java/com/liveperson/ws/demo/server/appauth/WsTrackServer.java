@@ -2,10 +2,6 @@ package com.liveperson.ws.demo.server.appauth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.liveperson.ws.demo.server.AuthenticationFilter;
 import com.liveperson.ws.demo.server.WsTrackConfigurator;
 import com.liveperson.ws.demo.server.auth.AuthData;
@@ -26,18 +22,18 @@ import javax.websocket.server.ServerEndpoint;
 import javax.websocket.*;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
 public class WsTrackServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(WsTrackServer.class);
-    private static final String INPUT_FILE = "/Users/eladw/git/ws_demo/ws-server/src/main/resources/input.txt";
+    private static final String INPUT_FILE = "D:\\git\\wertzber_ws_demo\\ws-server\\src\\main\\resources\\input.txt";
+    public static final int MAX_IDLE_TIMEOUT = 30000;
+    public static final int MAX_MESSAGE_BUFFER_SIZE = 60000;
     private ObjectMapper om = JacksonUtils.createObjectMapper();
     static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
 
@@ -78,8 +74,8 @@ public class WsTrackServer {
                 return;
             }
         }
-
-
+        session.setMaxTextMessageBufferSize(MAX_MESSAGE_BUFFER_SIZE);
+        session.setMaxIdleTimeout(MAX_IDLE_TIMEOUT); //set max idle timeout
         sessions.put(userName, session);
         session.getAsyncRemote().sendText("you are connected");
         printAllSessions();

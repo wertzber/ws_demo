@@ -28,8 +28,6 @@ public class ConnectTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectTest.class);
     private static final String CONSUMER_URI = "ws://localhost:9090/ws-track/eladw?token=1234";
 
-
-
     @Test
     public void testSyncRecv(){
         try {
