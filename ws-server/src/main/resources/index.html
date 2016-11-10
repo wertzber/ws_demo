@@ -17,7 +17,9 @@
         var initialFieldsetCollapsedState = {
             '#connect-fieldset': false,
             '#input-fieldset': false,
-            '#output-fieldset': false
+            '#output-fieldset': false,
+            '#messages-fieldset': false
+
         };
 
         // the jQuery $(selector) function is used to get an element from the DOM, and act on it, the selector argument
@@ -41,6 +43,11 @@
                 return false;
             });
 
+            $("#sendMessageButton").click(function (e) {
+                publishMessage($("#input").val());
+                return false;
+            });
+
             $("fieldset .collapse-toggle-button").click(function () {
                 var $fieldset = $(this).parent("fieldset");
                 $fieldset.toggleClass("collapsed");
@@ -48,6 +55,11 @@
             });
 
         });
+
+        function publishMessage(message) {
+            console.log("message:" + message)
+            sendJson(message);
+        }
 
         function buildWebSocketUrl() {
             $("#webSocketUrl").val("ws://" + host + "/ws-track/eladw?token=" + tokenParam);
@@ -58,8 +70,6 @@
                 $(selector).toggleClass('collapsed', initialFieldsetCollapsedState[selector]);
             }
         }
-
-
 
         function setElementsState() {
             var isBrandParticipant = $("#participantType").val() === "brand";
@@ -135,8 +145,9 @@
         }
 
         function onMessage(evt) {
-            var responseData = eval("(" + evt.data + ")");
             console.log("Event: " + evt.data);
+
+            var responseData = evt.data;
 
             if (responseData.hasOwnProperty("hint")) {
                 printInput(prettifyObject(responseData.hint));
@@ -200,7 +211,7 @@
         }
 
 
-           </script>
+       </script>
 
 </head>
 
@@ -254,4 +265,3 @@
 
 </body>
 </html>
-            

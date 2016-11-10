@@ -6,7 +6,10 @@ import com.liveperson.ws.demo.server.AuthenticationFilter;
 import com.liveperson.ws.demo.server.NotifyTimer;
 import com.liveperson.ws.demo.server.WsTrackConfigurator;
 import com.liveperson.ws.demo.server.auth.AuthData;
+import com.liveperson.ws.demo.server.dto.AppResponse;
+import com.liveperson.ws.demo.server.dto.ErrorResponse;
 import com.liveperson.ws.demo.server.dto.Person;
+import com.liveperson.ws.demo.server.dto.PersonResponse;
 import com.liveperson.ws.demo.server.utils.JacksonUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -26,10 +29,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
 public class WsTrackNotifyServer {
@@ -37,12 +37,12 @@ public class WsTrackNotifyServer {
     private static final String INPUT_FILE = "/Users/eladw/git/wertzber_ws_demo/ws-server/src/main/resources/input.txt";
     public static final int MAX_IDLE_TIMEOUT = 30000;
     public static final int MAX_MESSAGE_BUFFER_SIZE = 60000;
-    private ObjectMapper om = JacksonUtils.createObjectMapper();
+    public static ObjectMapper om = JacksonUtils.createObjectMapper();
     public static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
     public static List<Person> persons = new ArrayList<>();
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
-
-
+    private boolean isStartTimer = false;
+    ScheduledFuture<?> scheduledFuture;
 
     public static void main(String[] args) throws Exception {
         Server server = new Server(9090);
@@ -60,12 +60,14 @@ public class WsTrackNotifyServer {
         final AuthData authData = (AuthData) session.getUserProperties().get("authData");
         if (authData == null ) {
             LOGGER.error("Auth data is null");
-            session.getAsyncRemote().sendText("you are disconnected, close reason: missing Authentication info error");
+            session.getAsyncRemote().sendText(om.writeValueAsString(new ErrorResponse("you are disconnected, close reason: missing Authentication" +
+                    " info error")));
             session.close(new CloseReason(() -> 4401, "Authentication error")); //example 4401,4402,4403
             return;
         } else  if(authData.expireTime < System.currentTimeMillis() + 1000){
             LOGGER.error("Auth data expired");
-            session.getAsyncRemote().sendText("you are disconnected, close reason:  Authentication expire error");
+            session.getAsyncRemote().sendText(om.writeValueAsString(new ErrorResponse("you are disconnected, " +
+                    "close reason:  Authentication expire error")));
             session.close(new CloseReason(() -> 4402, "Authentication error"));
             return;
         } else {
@@ -76,7 +78,7 @@ public class WsTrackNotifyServer {
 
             if(!list.contains(authData.token)){
                 LOGGER.error("Token not valid in white list");
-                session.getAsyncRemote().sendText("you are disconnected, close reason: Authentication permission error");
+                session.getAsyncRemote().sendText(om.writeValueAsString(om.writeValueAsBytes(new ErrorResponse("you are disconnected, close reason: Authentication permission error"))));
                 session.close(new CloseReason(() -> 4403, "Authentication error"));
                 return;
             }
@@ -84,34 +86,36 @@ public class WsTrackNotifyServer {
         session.setMaxTextMessageBufferSize(MAX_MESSAGE_BUFFER_SIZE);
         session.setMaxIdleTimeout(MAX_IDLE_TIMEOUT); //set max idle timeout
         sessions.put(userName, session);
-        session.getAsyncRemote().sendText("you are connected");
+        session.getAsyncRemote().sendText(om.writeValueAsString(new AppResponse("you are connected")));
 
-        startTimers(userName);
 
         printAllSessions();
     }
 
     private void startTimers(String userName) {
         //  task will be scheduled after 5 sec delay
-        executor.scheduleAtFixedRate(new NotifyTimer(userName), 0, 1, TimeUnit.SECONDS);
+        scheduledFuture = executor.scheduleAtFixedRate(new NotifyTimer(userName), 0, 1, TimeUnit.SECONDS);
     }
 
     @OnMessage
     public void onMessage(final @PathParam("username") String userName, final String msg) throws Exception {
         final Session s = sessions.get(userName);
         try{
+
             LOGGER.info("recv msg {}", msg);
             Person person = om.readValue(msg, Person.class);
             persons.add(person);
             LOGGER.info("msg after jackson serialize {}", person);
             if (s != null) {
-                s.getAsyncRemote().sendText("Notify: " + om.writeValueAsString(person));
+                s.getAsyncRemote().sendText(om.writeValueAsString(new PersonResponse(person)));
             } else {
                 LOGGER.warn("Can't echo msg, user {} not connected ", userName);
             }
+            if(!isStartTimer) startTimers(userName);
+
         } catch(Exception e){
             if(s!=null){
-                s.getAsyncRemote().sendText(userName + "send unsupported message " + msg );
+                s.getAsyncRemote().sendText(om.writeValueAsString(new ErrorResponse(userName + " send unsupported message " + msg)));
                 LOGGER.error("Failed parse msg " + msg, e);
             }
             LOGGER.info("un support msg {}", msg);
@@ -122,6 +126,7 @@ public class WsTrackNotifyServer {
     public void onClose(final Session session) throws IOException {
         String userName = ((AuthData)session.getUserProperties().get("authData")).userName;
         sessions.remove(userName);
+        scheduledFuture.cancel(true);
         printAllSessions();
     }
 
