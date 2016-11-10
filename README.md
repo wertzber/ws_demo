@@ -139,7 +139,8 @@ Lets give it a try.
 First connect: ws://localhost:9090/ws-track/eladw?token=1234
 Then use the json:
 ```
-{"name":"eladw","age":22,","msgs":["msg1","msg2"]}
+{"name":"eladw","age":"22","msgs":["msg1","msg2"]}
+
 ```
 the echo test page
 
