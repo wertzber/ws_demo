@@ -142,6 +142,12 @@ Then use the json:
 {"name":"eladw","age":"22","msgs":["msg1","msg2"]}
 
 ```
-the echo test page
+On next release we add another key: 
+{"name":"eladw","age":"22","key":"key1","msgs":["msg1","msg2"]}
 
+still all working as expected ude to the definition: 
+```
+om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); 
+
+```
 
