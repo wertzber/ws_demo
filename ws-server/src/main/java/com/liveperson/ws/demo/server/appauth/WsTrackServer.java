@@ -74,8 +74,7 @@ public class WsTrackServer {
                 return;
             }
         }
-        session.setMaxTextMessageBufferSize(MAX_MESSAGE_BUFFER_SIZE);
-        session.setMaxIdleTimeout(MAX_IDLE_TIMEOUT); //set max idle timeout
+
         sessions.put(userName, session);
         session.getAsyncRemote().sendText("you are connected");
         printAllSessions();

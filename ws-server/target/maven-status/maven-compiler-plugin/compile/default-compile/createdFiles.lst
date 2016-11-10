@@ -1,6 +1,0 @@
-com/liveperson/ws/demo/server/AuthenticationFilter.class
-com/liveperson/ws/demo/server/WsTrackConfigurator.class
-com/liveperson/ws/demo/server/auth/AuthData.class
-com/liveperson/ws/demo/server/utils/JacksonUtils.class
-com/liveperson/ws/demo/server/appauth/WsTrackServer.class
-com/liveperson/ws/demo/server/dto/Person.class
