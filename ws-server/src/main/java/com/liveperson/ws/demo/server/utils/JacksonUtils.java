@@ -22,7 +22,7 @@ public class JacksonUtils {
     public static ObjectMapper createObjectMapper(){
         ObjectMapper om = new ObjectMapper();
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); //can add fields for later versions
-        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);//don\t send null fields in order to save badwidth
+        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);//don't send null fields in order to save badwidth
         om.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL,true); //in case of wrong enum put null and don't fail req
         return om;
     }

@@ -14,12 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.DispatcherType;
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
+import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import javax.websocket.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -29,9 +26,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
-public class WsTrackServer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WsTrackServer.class);
-    private static final String INPUT_FILE = "D:\\git\\wertzber_ws_demo\\ws-server\\src\\main\\resources\\input.txt";
+public class WsTrackNotifyServer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WsTrackNotifyServer.class);
+    private static final String INPUT_FILE = "/Users/eladw/git/wertzber_ws_demo/ws-server/src/main/resources/input.txt";
     public static final int MAX_IDLE_TIMEOUT = 30000;
     public static final int MAX_MESSAGE_BUFFER_SIZE = 60000;
     private ObjectMapper om = JacksonUtils.createObjectMapper();
@@ -42,7 +39,7 @@ public class WsTrackServer {
 
         final ServletContextHandler context = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
         context.addFilter(AuthenticationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-        WebSocketServerContainerInitializer.configureContext(context).addEndpoint(WsTrackServer.class);
+        WebSocketServerContainerInitializer.configureContext(context).addEndpoint(WsTrackNotifyServer.class);
         LOGGER.info("Starting server..");
         server.start();
     }
@@ -89,13 +86,14 @@ public class WsTrackServer {
             Person person = om.readValue(msg, Person.class);
             LOGGER.info("msg after jackson serialize {}", person);
             if (s != null) {
-                s.getAsyncRemote().sendText(om.writeValueAsString(person));
+                s.getAsyncRemote().sendText("Notify: " + om.writeValueAsString(person));
             } else {
                 LOGGER.warn("Can't echo msg, user {} not connected ", userName);
             }
         } catch(Exception e){
             if(s!=null){
                 s.getAsyncRemote().sendText(userName + "send unsupported message " + msg );
+                LOGGER.error("Failed parse msg " + msg, e);
             }
             LOGGER.info("un support msg {}", msg);
         }
