@@ -139,8 +139,15 @@ Lets give it a try.
 First connect: ws://localhost:9090/ws-track/eladw?token=1234
 Then use the json:
 ```
-{"name":"eladw","age":22,","msgs":["msg1","msg2"]}
-```
-the echo test page
+{"name":"eladw","age":"22","msgs":["msg1","msg2"]}
 
+```
+On next release we add another key: 
+{"name":"eladw","age":"22","key":"key1","msgs":["msg1","msg2"]}
+
+still all working as expected ude to the definition: 
+```
+om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); 
+
+```
 
