@@ -3,6 +3,7 @@ package com.liveperson.ws.demo.server.appauth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liveperson.ws.demo.server.AuthenticationFilter;
+import com.liveperson.ws.demo.server.NotifyTimer;
 import com.liveperson.ws.demo.server.WsTrackConfigurator;
 import com.liveperson.ws.demo.server.auth.AuthData;
 import com.liveperson.ws.demo.server.dto.Person;
@@ -21,9 +22,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
 public class WsTrackNotifyServer {
@@ -32,7 +38,11 @@ public class WsTrackNotifyServer {
     public static final int MAX_IDLE_TIMEOUT = 30000;
     public static final int MAX_MESSAGE_BUFFER_SIZE = 60000;
     private ObjectMapper om = JacksonUtils.createObjectMapper();
-    static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
+    public static List<Person> persons = new ArrayList<>();
+    ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
+
+
 
     public static void main(String[] args) throws Exception {
         Server server = new Server(9090);
@@ -75,7 +85,15 @@ public class WsTrackNotifyServer {
         session.setMaxIdleTimeout(MAX_IDLE_TIMEOUT); //set max idle timeout
         sessions.put(userName, session);
         session.getAsyncRemote().sendText("you are connected");
+
+        startTimers(userName);
+
         printAllSessions();
+    }
+
+    private void startTimers(String userName) {
+        //  task will be scheduled after 5 sec delay
+        executor.scheduleAtFixedRate(new NotifyTimer(userName), 0, 1, TimeUnit.SECONDS);
     }
 
     @OnMessage
@@ -84,6 +102,7 @@ public class WsTrackNotifyServer {
         try{
             LOGGER.info("recv msg {}", msg);
             Person person = om.readValue(msg, Person.class);
+            persons.add(person);
             LOGGER.info("msg after jackson serialize {}", person);
             if (s != null) {
                 s.getAsyncRemote().sendText("Notify: " + om.writeValueAsString(person));
