@@ -8,6 +8,7 @@ import java.util.List;
 public class Person {
 
     private String name;
+    private long connectedCustomers;
     private int age;
     private List<String> msgs;
 
@@ -36,10 +37,19 @@ public class Person {
         this.msgs = msgs;
     }
 
+    public long getConnectedCustomers() {
+        return connectedCustomers;
+    }
+
+    public void setConnectedCustomers(long connectedCustomers) {
+        this.connectedCustomers = connectedCustomers;
+    }
+
     @Override
     public String toString() {
         return "Person{" +
                 "name='" + name + '\'' +
+                ", connectedCustomers=" + connectedCustomers +
                 ", age=" + age +
                 ", msgs=" + msgs +
                 '}';

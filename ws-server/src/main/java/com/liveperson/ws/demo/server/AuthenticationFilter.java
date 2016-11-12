@@ -41,7 +41,6 @@ public class AuthenticationFilter implements Filter {
             httpRequest.getSession().setAttribute("authData", authData);
             chain.doFilter(request, response);
         }
-
     }
 
     private String getUsernameFromUri(String reqUri) {

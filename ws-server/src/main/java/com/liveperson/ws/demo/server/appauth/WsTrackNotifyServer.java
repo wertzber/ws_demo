@@ -25,16 +25,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.*;
 
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
 public class WsTrackNotifyServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(WsTrackNotifyServer.class);
-    private static final String INPUT_FILE = "/Users/eladw/git/wertzber_ws_demo/ws-server/src/main/resources/input.txt";
+    private static final String INPUT_FILE = "D:\\git\\wertzber_ws_demo\\ws-server\\src\\main\\resources\\input.txt";
     public static final int MAX_IDLE_TIMEOUT = 30000;
     public static final int MAX_MESSAGE_BUFFER_SIZE = 60000;
     public static ObjectMapper om = JacksonUtils.createObjectMapper();
@@ -43,6 +40,8 @@ public class WsTrackNotifyServer {
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
     private boolean isStartTimer = false;
     ScheduledFuture<?> scheduledFuture;
+    public static Random convGenerator = new Random();
+
 
     public static void main(String[] args) throws Exception {
         Server server = new Server(9090);
@@ -78,7 +77,7 @@ public class WsTrackNotifyServer {
 
             if(!list.contains(authData.token)){
                 LOGGER.error("Token not valid in white list");
-                session.getAsyncRemote().sendText(om.writeValueAsString(om.writeValueAsBytes(new ErrorResponse("you are disconnected, close reason: Authentication permission error"))));
+                //session.getAsyncRemote().sendText(om.writeValueAsString(om.writeValueAsBytes(new ErrorResponse("4403 you are disconnected, close reason: Authentication permission error"))));
                 session.close(new CloseReason(() -> 4403, "Authentication error"));
                 return;
             }
@@ -94,7 +93,7 @@ public class WsTrackNotifyServer {
 
     private void startTimers(String userName) {
         //  task will be scheduled after 5 sec delay
-        scheduledFuture = executor.scheduleAtFixedRate(new NotifyTimer(userName), 0, 1, TimeUnit.SECONDS);
+        scheduledFuture = executor.scheduleAtFixedRate(new NotifyTimer(userName), 0, 2, TimeUnit.SECONDS);
     }
 
     @OnMessage

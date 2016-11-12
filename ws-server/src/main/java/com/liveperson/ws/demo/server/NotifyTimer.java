@@ -7,10 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.websocket.Session;
-import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 /**
@@ -35,8 +32,12 @@ public class NotifyTimer implements Runnable {
             if(s!=null){
                 //Solution
                 List<Person> personToSend = WsTrackNotifyServer.persons.stream()
-                        .filter(p -> p.getAge() > 18)
+                       // .filter(p -> p.getAge() > 18)
                         .sorted((p1, p2) -> p1.getAge() - p2.getAge())
+                        .map(p -> {
+                            p.setConnectedCustomers(WsTrackNotifyServer.convGenerator.nextInt(10));
+                            return p;
+                        })
                         //.map(p -> p.getAge() + ":" + p.getName())
                         //.collect(Collectors.joining(", "));
                         .collect(Collectors.toList());
