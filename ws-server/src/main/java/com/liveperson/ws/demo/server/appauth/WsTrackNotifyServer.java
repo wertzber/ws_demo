@@ -31,7 +31,7 @@ import java.util.concurrent.*;
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
 public class WsTrackNotifyServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(WsTrackNotifyServer.class);
-    private static final String INPUT_FILE = "D:\\git\\wertzber_ws_demo\\ws-server\\src\\main\\resources\\input.txt";
+    private static final String INPUT_FILE = "/Users/eladw/git/wertzber_ws_demo/ws-server/src/main/resources/input.txt";
     public static final int MAX_IDLE_TIMEOUT = 30000;
     public static final int MAX_MESSAGE_BUFFER_SIZE = 60000;
     public static ObjectMapper om = JacksonUtils.createObjectMapper();

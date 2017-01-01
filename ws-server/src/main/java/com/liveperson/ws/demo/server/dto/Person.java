@@ -10,6 +10,7 @@ public class Person {
     private String name;
     private long connectedCustomers;
     private int age;
+    private int id;
     private List<String> msgs;
 
     public String getName() {
@@ -43,6 +44,14 @@ public class Person {
 
     public void setConnectedCustomers(long connectedCustomers) {
         this.connectedCustomers = connectedCustomers;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override

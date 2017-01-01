@@ -1,12 +1,16 @@
 package com.liveperson.ws.demo.server.appauth;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import com.github.fge.jsonschema.main.JsonSchema;
 import com.liveperson.ws.demo.server.AuthenticationFilter;
 import com.liveperson.ws.demo.server.WsTrackConfigurator;
 import com.liveperson.ws.demo.server.auth.AuthData;
 import com.liveperson.ws.demo.server.dto.Person;
 import com.liveperson.ws.demo.server.utils.JacksonUtils;
+import com.liveperson.ws.demo.server.validation.ValidationUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
@@ -31,11 +35,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(value = "/ws-track/{username}", configurator = WsTrackConfigurator.class)
 public class WsTrackServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(WsTrackServer.class);
-    private static final String INPUT_FILE = "D:\\git\\wertzber_ws_demo\\ws-server\\src\\main\\resources\\input.txt";
+    private static final String INPUT_FILE = "/Users/eladw/git/wertzber_ws_demo/ws-server/src/main/resources/input.txt";
+    private static final String INPUT_FILE_JSON = "/Users/eladw/git/wertzber_ws_demo/ws-server/src/main/resources/validate.json";
+
     public static final int MAX_IDLE_TIMEOUT = 30000;
     public static final int MAX_MESSAGE_BUFFER_SIZE = 60000;
     private ObjectMapper om = JacksonUtils.createObjectMapper();
     static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
+    private File jsonSchcemeValidatorFile = new File(INPUT_FILE_JSON);
 
     public static void main(String[] args) throws Exception {
         Server server = new Server(9090);
@@ -85,13 +92,23 @@ public class WsTrackServer {
         final Session s = sessions.get(userName);
         try{
             LOGGER.info("recv msg {}", msg);
+
             Person person = om.readValue(msg, Person.class);
             LOGGER.info("msg after jackson serialize {}", person);
             if (s != null) {
+                //valdiate
+                JsonSchema jsonSchemeNode = ValidationUtils.getSchemaNode(jsonSchcemeValidatorFile);
+                JsonNode msgNode = ValidationUtils.getJsonNode(msg);
+                ValidationUtils.validateJson(jsonSchemeNode, msgNode);
                 s.getAsyncRemote().sendText(om.writeValueAsString(person));
             } else {
                 LOGGER.warn("Can't echo msg, user {} not connected ", userName);
             }
+        } catch(ProcessingException proe){
+            if(s!=null){
+                s.getAsyncRemote().sendText(userName + "send bad json message " + proe.getMessage() );
+            }
+            LOGGER.info("Bad json {}", msg);
         } catch(Exception e){
             if(s!=null){
                 s.getAsyncRemote().sendText(userName + "send unsupported message " + msg );
